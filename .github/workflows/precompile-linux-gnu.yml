@@ -16,6 +16,7 @@ jobs:
   linux-gnu:
     runs-on: ubuntu-latest
     env:
+      # compile gprc from source
       # https://github.com/grpc/grpc/releases
       GRPC_VERSION: "1.62.1"
     strategy:

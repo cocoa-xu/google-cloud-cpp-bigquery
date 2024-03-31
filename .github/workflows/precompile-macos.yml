@@ -13,43 +13,47 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    runs-on: macos-12
+  x86_64-apple-darwin:
+    runs-on: ${{ matrix.job.runner }}
     env:
       # compile gprc from source
       # https://github.com/grpc/grpc/releases
       GRPC_VERSION: "1.62.1"
     strategy:
       matrix:
-        arch: [x86_64, arm64]
+        job:
+          - { arch: x86_64, runner: macos-12 }
+          - { arch: aarch64, runner: macos-14 }
       fail-fast: false
 
-    name: ${{ matrix.arch }}-apple-darwin
+    name: ${{ matrix.job.arch }}-apple-darwin
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
-          brew install openssl
+          brew install autoconf automake libtool shtool openssl
 
       - name: Compile gRPC
         run: |
+          export TRIPLET="${{ matrix.job.arch }}-apple-darwin"
           git clone https://github.com/grpc/grpc.git
           cd grpc
-          git checkout "v${GRPC_VERSION}"
+          git checkout "v${{ env.GRPC_VERSION }}"
           git submodule update --init --recursive
           cmake -S . -B "build-${TRIPLET}" -DCMAKE_BUILD_TYPE=Release
           cd "build-${TRIPLET}"
-          make -j$(sysctl -n hw.ncpu)
-          make -j$(sysctl -n hw.ncpu) install
+          LIBTOOL=glibtool LIBTOOLIZE=glibtoolize make -j$(sysctl -n hw.ncpu)
+          LIBTOOL=glibtool LIBTOOLIZE=glibtoolize make -j$(sysctl -n hw.ncpu) install
 
       - name: Compile google-cloud-cpp bigquery
         run: |
+          export TRIPLET="${{ matrix.job.arch }}-apple-darwin"
           export BIGQUERY_VERSION=${GITHUB_REF##*/v}
-          export PERFIX_DIR="/tmp/bigquery-${{ matrix.arch }}-apple-darwin"
+          export PERFIX_DIR="/tmp/bigquery-${TRIPLET}"
           mkdir -p "${PERFIX_DIR}"
-          
+
           curl -fSL "https://github.com/googleapis/google-cloud-cpp/archive/refs/tags/v${BIGQUERY_VERSION}.tar.gz" -o "google-cloud-cpp-${BIGQUERY_VERSION}.tar.gz"
 
           tar xf "google-cloud-cpp-${BIGQUERY_VERSION}.tar.gz"
@@ -69,12 +73,12 @@ jobs:
       - name: Create tarball
         run: |
           export BIGQUERY_VERSION=${GITHUB_REF##*/v}
-          export PERFIX_DIR="/tmp/bigquery-${{ matrix.arch }}-apple-darwin"
+          export PERFIX_DIR="/tmp/bigquery-${{ matrix.job.arch }}-apple-darwin"
           export ROOTDIR="$(pwd)"
           cd "${PERFIX_DIR}"
-          tar -czf "${ROOTDIR}/bigquery-${BIGQUERY_VERSION}-${{ matrix.arch }}-apple-darwin.tar.gz" .
+          tar -czf "${ROOTDIR}/bigquery-${BIGQUERY_VERSION}-${{ matrix.job.arch }}-apple-darwin.tar.gz" .
           cd "${ROOTDIR}"
-          shasum -a 256 "bigquery-${BIGQUERY_VERSION}-${{ matrix.arch }}-apple-darwin.tar.gz" | tee "bigquery-${BIGQUERY_VERSION}-${{ matrix.arch }}-apple-darwin.tar.gz.sha256"
+          shasum -a 256 "bigquery-${BIGQUERY_VERSION}-${{ matrix.job.arch }}-apple-darwin.tar.gz" | tee "bigquery-${BIGQUERY_VERSION}-${{ matrix.job.arch }}-apple-darwin.tar.gz.sha256"
 
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
