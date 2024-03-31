@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+set -xe
 
 BIGQUERY_VERSION=$1
 GRPC_VERSION=$2
@@ -10,8 +10,7 @@ PERFIX_DIR="/bigquery-${TRIPLET}"
 
 case $TRIPLET in
      riscv64-linux-gnu )
-          apt-get update && \
-               apt-get install -y gcc g++ curl cmake make automake autoconf libncurses5-dev perl python3
+          apt-get update && apt-get install -y gcc g++ git curl cmake libssl-dev
           ;;
      *-linux-gnu )
           yum install -y curl openssl-devel cmake git
