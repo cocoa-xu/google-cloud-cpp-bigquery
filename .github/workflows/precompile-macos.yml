@@ -45,7 +45,7 @@ jobs:
           cmake -S . -B "build-${TRIPLET}" -DCMAKE_BUILD_TYPE=Release
           cd "build-${TRIPLET}"
           LIBTOOL=glibtool LIBTOOLIZE=glibtoolize make -j$(sysctl -n hw.ncpu)
-          LIBTOOL=glibtool LIBTOOLIZE=glibtoolize make -j$(sysctl -n hw.ncpu) install
+          LIBTOOL=glibtool LIBTOOLIZE=glibtoolize sudo make -j$(sysctl -n hw.ncpu) install
 
       - name: Compile google-cloud-cpp bigquery
         run: |
