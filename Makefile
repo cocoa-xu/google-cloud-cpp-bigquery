@@ -1,3 +1,8 @@
+ABSEIL_CPP_VERSION = lts_2024_01_16
+GRPC_VERSION = v1.62.1
+OPENSSL_VERSION = 3.2.1
+GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+
 .DEFAULT_GLOBAL := build
 
 BUILD_DIR ?= $(shell pwd)/build
@@ -6,24 +11,20 @@ CMAKE_CXX_STANDARD ?= 14
 
 THRID_PARTY_DIR = $(shell pwd)/third_party
 
-ABSEIL_CPP_VERSION = lts_2024_01_16
 ABSEIL_CPP_GIT_REPO = https://github.com/abseil/abseil-cpp.git
 ABSEIL_CPP_SRC_DIR = $(THRID_PARTY_DIR)/abseil-cpp
 ABSEIL_CPP_BUILD_DIR = $(BUILD_DIR)/abseil-cpp
 ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/absl/abslConfig.cmake
 
-GRPC_VERSION = v1.62.1
 GRPC_GIT_REPO = https://github.com/grpc/grpc.git
 GRPC_SRC_DIR = $(THRID_PARTY_DIR)/grpc
 GRPC_BUILD_DIR = $(BUILD_DIR)/grpc
 GRPC_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/grpc/gRPCConfig.cmake
 
-OPENSSL_VERSION = 3.2.1
 OPENSSL_TARBALL = $(THRID_PARTY_DIR)/openssl-$(OPENSSL_VERSION).tar.gz
 OPENSSL_SRC_DIR = $(THRID_PARTY_DIR)/openssl-$(OPENSSL_VERSION)
 OPENSSL_INSTALL_PREFIX = $(INSTALL_PREFIX)/openssl
 
-GOOGLE_CLOUD_CPP_VERSION = v2.22.0
 GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)/google-cloud-cpp
