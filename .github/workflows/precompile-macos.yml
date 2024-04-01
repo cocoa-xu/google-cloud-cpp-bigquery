@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 jobs:
-  x86_64-apple-darwin:
+  macos:
     runs-on: ${{ matrix.job.runner }}
     strategy:
       matrix:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Compile everything
         run: |          
-          make
+          make NPROC=2
 
       - name: Create tarball
         run: |

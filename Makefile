@@ -30,15 +30,20 @@ GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/google_cloud_cpp_bigquery/google_cloud_cpp_bigquery-config.cmake
 
+ifndef NPROC
 UNAME_S = $(shell uname -s)
 ifneq ($(UNAME_S),Darwin)
 NPROC = $(shell sysctl -n hw.ncpu)
 else
 NPROC = $(shell nproc)
 endif
+endif
 
-build: $(THRID_PARTY_DIR) build-deps
+build: nproc $(THRID_PARTY_DIR) build-deps
 	@ echo "Build done"
+
+nproc:
+	@ echo "Parallel Jobs: $(NPROC)"
 
 $(THRID_PARTY_DIR):
 	@ mkdir -p "$(THRID_PARTY_DIR)"
