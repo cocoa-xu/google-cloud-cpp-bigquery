@@ -3,11 +3,18 @@ GRPC_VERSION = v1.62.1
 OPENSSL_VERSION = 3.2.1
 GOOGLE_CLOUD_CPP_VERSION = v2.22.0
 
-.DEFAULT_GLOBAL := build
-
 BUILD_DIR ?= $(shell pwd)/build
 INSTALL_PREFIX ?= $(shell pwd)/install
 CMAKE_CXX_STANDARD ?= 17
+
+ifndef NPROC
+UNAME_S = $(shell uname -s)
+ifneq ($(UNAME_S),Darwin)
+NPROC = $(shell sysctl -n hw.ncpu)
+else
+NPROC = $(shell nproc)
+endif
+endif
 
 THRID_PARTY_DIR = $(shell pwd)/third_party
 
@@ -29,15 +36,6 @@ GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/google_cloud_cpp_bigquery/google_cloud_cpp_bigquery-config.cmake
-
-ifndef NPROC
-UNAME_S = $(shell uname -s)
-ifneq ($(UNAME_S),Darwin)
-NPROC = $(shell sysctl -n hw.ncpu)
-else
-NPROC = $(shell nproc)
-endif
-endif
 
 build: nproc $(THRID_PARTY_DIR) build-deps
 	@ echo "Build done"
@@ -134,8 +132,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D OPENSSL_ROOT_DIR="$(INSTALL_PREFIX)/openssl" \
 			-D BUILD_TESTING=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
-			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
-			-D ABSL_PROPAGATE_CXX_STD=ON ; \
+			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery ; \
 	fi
 
 install-google-cloud-cpp: config-google-cloud-cpp

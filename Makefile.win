@@ -1,0 +1,114 @@
+ABSEIL_CPP_VERSION = lts_2024_01_16
+GRPC_VERSION = v1.62.1
+OPENSSL_VERSION = 3.2.1
+GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+
+BUILD_DIR = $(MAKEDIR)\build
+INSTALL_PREFIX = $(MAKEDIR)\install
+CMAKE_CXX_STANDARD = 17
+
+!IFNDEF NPROC
+NPROC = 2
+!ENDIF
+
+THRID_PARTY_DIR = $(MAKEDIR)\third_party
+
+ABSEIL_CPP_GIT_REPO = https://github.com/abseil/abseil-cpp.git
+ABSEIL_CPP_SRC_DIR = $(THRID_PARTY_DIR)\abseil-cpp
+ABSEIL_CPP_BUILD_DIR = $(BUILD_DIR)\abseil-cpp
+ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\absl\abslConfig.cmake
+
+GRPC_GIT_REPO = https://github.com/grpc/grpc.git
+GRPC_SRC_DIR = $(THRID_PARTY_DIR)\grpc
+GRPC_BUILD_DIR = $(BUILD_DIR)\grpc
+GRPC_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\grpc\gRPCConfig.cmake
+
+GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
+GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
+GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)\google-cloud-cpp
+GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\google_cloud_cpp_bigquery\google_cloud_cpp_bigquery-config.cmake
+
+build: nproc $(THRID_PARTY_DIR) build-deps
+	@ echo "Build done"
+
+nproc:
+	@ echo "Parallel Jobs: $(NPROC)"
+
+$(THRID_PARTY_DIR):
+	@ if not exist "$(THRID_PARTY_DIR)" mkdir "$(THRID_PARTY_DIR)"
+
+build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+
+fetch-abseil-cpp:
+	@ if not exist "$(ABSEIL_CPP_SRC_DIR)" ( \
+		git clone --depth=1 --branch $(ABSEIL_CPP_VERSION) $(ABSEIL_CPP_GIT_REPO) "$(ABSEIL_CPP_SRC_DIR)" \
+    )
+
+config-abseil-cpp: fetch-abseil-cpp
+	@ if not exist "$(ABSEIL_CPP_CONFIG_CMAKE)" ( \
+		cd "$(ABSEIL_CPP_SRC_DIR)" && \
+		cmake -S . -B "$(ABSEIL_CPP_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
+			-D ABSL_PROPAGATE_CXX_STD=ON \
+            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+	)
+
+install-abseil-cpp: config-abseil-cpp
+	@ if not exist "$(ABSEIL_CPP_CONFIG_CMAKE)" ( \
+		cmake --build "$(ABSEIL_CPP_BUILD_DIR)" --config Release --target install --parallel $(NPROC) \
+    )
+
+$(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
+
+fetch-grpc:
+    @ if not exist "$(GRPC_SRC_DIR)" ( \
+        git clone $(GRPC_GIT_REPO) "$(GRPC_SRC_DIR)" \
+    )
+
+config-grpc: fetch-grpc
+	@ if not exist "$(GRPC_CONFIG_CMAKE)" ( \
+		cd "$(GRPC_SRC_DIR)" && \
+		git submodule update --init && \
+		cmake -S . -B "$(GRPC_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
+			-D ABSL_PROPAGATE_CXX_STD=ON \
+            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+    )
+
+install-grpc: config-grpc
+    @ if not exist "$(GRPC_CONFIG_CMAKE)" ( \
+        cmake --build "$(GRPC_BUILD_DIR)" --config Release --target install --parallel $(NPROC) \
+    )
+
+$(GRPC_CONFIG_CMAKE): install-grpc
+
+fetch-google-cloud-cpp:
+	@ if not exist "$(GOOGLE_CLOUD_CPP_SRC_DIR)" ( \
+		git clone --depth=1 --branch $(GOOGLE_CLOUD_CPP_VERSION) $(GOOGLE_CLOUD_CPP_GIT_REPO) "$(GOOGLE_CLOUD_CPP_SRC_DIR)" \
+    )
+
+config-google-cloud-cpp: fetch-google-cloud-cpp
+    @ if not exist "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ( \
+		cd "$(GOOGLE_CLOUD_CPP_SRC_DIR)" && \
+		cmake -S . -B "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
+			-D CMAKE_PREFIX_PATH="$(INSTALL_PREFIX)/lib/cmake" \
+			-D OPENSSL_ROOT_DIR="$(INSTALL_PREFIX)/openssl" \
+			-D BUILD_TESTING=OFF \
+			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
+			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
+			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+    )
+
+install-google-cloud-cpp: config-google-cloud-cpp
+	@ if not exist "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ( \
+		cmake --build "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" --config Release --target install --parallel $(NPROC) \
+    )
+
+$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE): install-google-cloud-cpp

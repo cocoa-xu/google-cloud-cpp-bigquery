@@ -1,4 +1,4 @@
-name: precompile-macos
+name: precompile-windows
 
 on:
   push:
@@ -13,32 +13,31 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    runs-on: ${{ matrix.job.runner }}
-    strategy:
-      matrix:
-        job:
-          - { arch: x86_64, runner: macos-12 }
-          - { arch: aarch64, runner: macos-14 }
-      fail-fast: false
+  windows:
+    runs-on: windows-2019
 
-    name: ${{ matrix.job.arch }}-apple-darwin
+    name: x86_64-windows-msvc
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Install dependencies
         run: |
-          brew install autoconf automake libtool shtool openssl
-
+          choco install -y nasm
+          choco install -y ninja
+          choco install -y cmake
+      
       - name: Compile everything
-        run: |          
-          make NPROC=2
+        run: |
+          nmake /F Makefile.win
 
       - name: Create tarball
+        shell: bash
         run: |
           export BIGQUERY_VERSION=${GITHUB_REF##*/v}
-          export TRIPLET="${{ matrix.job.arch }}-apple-darwin"
+          export TRIPLET="x86_64-windows-msvc"
           export ROOTDIR="$(pwd)"
           cd install
           tar -czf "${ROOTDIR}/bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" .
@@ -51,3 +50,4 @@ jobs:
           files: |
             bigquery-*.tar.gz
             bigquery-*.tar.gz.sha256
+
