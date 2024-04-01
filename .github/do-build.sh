@@ -8,7 +8,7 @@ PERFIX_DIR="/bigquery-${TRIPLET}"
 
 case $TRIPLET in
      *-linux-gnu )
-          yum install -y curl cmake git openssl-devel 
+          yum install -y curl automake autoconf openssl-devel ncurses-devel perl-IPC-Cmd python3 cmake git
           ;;
      * )
           echo "Unknown triplet: ${TRIPLET}"
