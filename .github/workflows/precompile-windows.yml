@@ -31,7 +31,7 @@ jobs:
       
       - name: Compile everything
         run: |
-          nmake /F Makefile.win
+          nmake /F Makefile.win NPROC=2
 
       - name: Create tarball
         shell: bash

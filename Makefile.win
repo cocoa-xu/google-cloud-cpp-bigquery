@@ -27,6 +27,9 @@ GRPC_SRC_DIR = $(THRID_PARTY_DIR)\grpc
 GRPC_BUILD_DIR = $(BUILD_DIR)\grpc
 GRPC_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\grpc\gRPCConfig.cmake
 
+OPENSSL_PRECOMPILED_URL = https://github.com/cocoa-xu/openssl-build/releases/download/v$(OPENSSL_VERSION)/openssl-static-x86_64-windows-msvc.tar.gz
+OPENSSL_PRECOMPILED_TARBALL = $(THRID_PARTY_DIR)\openssl-static-x86_64-windows-msvc.tar.gz
+
 GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)\google-cloud-cpp
@@ -91,6 +94,17 @@ install-grpc: config-grpc
     )
 
 $(GRPC_CONFIG_CMAKE): install-grpc
+
+fetch-openssl:
+    @ if not exist "$(OPENSSL_PRECOMPILED_TARBALL)" ( \
+        curl -L $(OPENSSL_PRECOMPILED_URL) -o "$(OPENSSL_PRECOMPILED_TARBALL)" \
+    )
+
+install-openssl: fetch-openssl
+    @ if not exist "$(INSTALL_PREFIX)\openssl" ( \
+        mkdir "$(INSTALL_PREFIX)\openssl" && \
+        tar -xf "$(OPENSSL_PRECOMPILED_TARBALL)" -C "$(INSTALL_PREFIX)\openssl" \
+    )
 
 fetch-google-cloud-cpp:
 	@ if not exist "$(GOOGLE_CLOUD_CPP_SRC_DIR)" ( \
