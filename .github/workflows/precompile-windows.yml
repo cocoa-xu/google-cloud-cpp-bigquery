@@ -45,7 +45,7 @@ jobs:
           cd install
           tar -czf "${ROOTDIR}/bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" .
           cd "${ROOTDIR}"
-          shasum -a 256 "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" | tee "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz.sha256"
+          sha256sum "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" | tee "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz.sha256"
 
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
