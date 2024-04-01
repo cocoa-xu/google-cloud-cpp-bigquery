@@ -105,7 +105,7 @@ unarchive-openssl: download-openssl
 install-openssl: unarchive-openssl
 	@ if [ ! -f "$(OPENSSL_INSTALL_PREFIX)/include/openssl/opensslconf.h" ]; then \
 		cd "$(OPENSSL_SRC_DIR)" && \
-		./config --prefix="$(OPENSSL_INSTALL_PREFIX)" --openssldir="$(OPENSSL_INSTALL_PREFIX)" no-tests shared && \
+		./config --prefix="$(OPENSSL_INSTALL_PREFIX)" --openssldir="$(OPENSSL_INSTALL_PREFIX)" no-tests no-shared && \
 		make -j$(NPROC) && \
 		make -j$(NPROC) install_sw && \
 		make -j$(NPROC) install_ssldirs ; \
