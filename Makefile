@@ -37,12 +37,7 @@ NPROC = $(shell nproc)
 endif
 
 build: $(THRID_PARTY_DIR) build-deps
-	@ cmake -S . -B "$(BUILD_DIR)/poc" \
-		-D CMAKE_BUILD_TYPE=Release \
-		-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-		-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
-		-D BIGQUERY_INSTALL_DIR="$(INSTALL_PREFIX)"
-	@ cmake --build "$(BUILD_DIR)/poc" --config Release -j
+	@ echo "Build done"
 
 $(THRID_PARTY_DIR):
 	@ mkdir -p "$(THRID_PARTY_DIR)"
