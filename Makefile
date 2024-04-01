@@ -68,7 +68,7 @@ config-abseil-cpp: fetch-abseil-cpp
 
 install-abseil-cpp: config-abseil-cpp
 	@ if [ ! -f "$(ABSEIL_CPP_CONFIG_CMAKE)" ]; then \
-		cmake --build "$(ABSEIL_CPP_BUILD_DIR)" --config Release --target install -j ; \
+		cmake --build "$(ABSEIL_CPP_BUILD_DIR)" --config Release --target install --parallel $(NPROC) ; \
 	fi
 
 $(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
@@ -92,7 +92,7 @@ config-grpc: fetch-grpc
 
 install-grpc: config-grpc
 	@ if [ ! -f "$(GRPC_CONFIG_CMAKE)" ]; then \
-		cmake --build "$(GRPC_BUILD_DIR)" --config Release --target install -j ; \
+		cmake --build "$(GRPC_BUILD_DIR)" --config Release --target install --parallel $(NPROC) ; \
 	fi
 
 $(GRPC_CONFIG_CMAKE): install-grpc
@@ -140,7 +140,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 
 install-google-cloud-cpp: config-google-cloud-cpp
 	@ if [ ! -f "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ]; then \
-		cmake --build "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" --config Release --target install -j ; \
+		cmake --build "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" --config Release --target install --parallel $(NPROC) ; \
 	fi
 
 $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE): install-google-cloud-cpp
