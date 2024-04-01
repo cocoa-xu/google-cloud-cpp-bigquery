@@ -11,6 +11,10 @@ CMAKE_CXX_STANDARD = 17
 NPROC = 2
 !ENDIF
 
+!IFNDEF CMAKE_GENERATOR_TYPE
+CMAKE_GENERATOR_TYPE=Ninja
+!ENDIF
+
 THRID_PARTY_DIR = $(MAKEDIR)\third_party
 
 ABSEIL_CPP_GIT_REPO = https://github.com/abseil/abseil-cpp.git
@@ -53,6 +57,7 @@ config-abseil-cpp: fetch-abseil-cpp
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
 			-D ABSL_PROPAGATE_CXX_STD=ON \
             -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
+            -G "$(CMAKE_GENERATOR_TYPE)" \
 	)
 
 install-abseil-cpp: config-abseil-cpp
@@ -77,6 +82,7 @@ config-grpc: fetch-grpc
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
 			-D ABSL_PROPAGATE_CXX_STD=ON \
             -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
+            -G "$(CMAKE_GENERATOR_TYPE)" \
     )
 
 install-grpc: config-grpc
@@ -104,6 +110,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
 			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
+            -G "$(CMAKE_GENERATOR_TYPE)" \
     )
 
 install-google-cloud-cpp: config-google-cloud-cpp
