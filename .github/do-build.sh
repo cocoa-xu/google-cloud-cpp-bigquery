@@ -18,7 +18,7 @@ esac
 
 # ------------ Compile everything ------------
 cd /work
-make
+make NPROC=2
 
 # ------------ create tarball ------------
 
