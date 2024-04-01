@@ -3,8 +3,7 @@
 set -x
 
 BIGQUERY_VERSION=$1
-GRPC_VERSION=$2
-ARCH=$3
+ARCH=$2
 IMAGE_NAME="quay.io/pypa/manylinux2014_$ARCH:latest"
 
 if [ "${ARCH}" = "riscv64" ]; then
@@ -12,4 +11,4 @@ if [ "${ARCH}" = "riscv64" ]; then
 fi
 
 sudo docker run --privileged --network=host --rm -v $(pwd):/work "${IMAGE_NAME}" \
-    sh -c "chmod a+x /work/do-build.sh && /work/do-build.sh ${BIGQUERY_VERSION} ${GRPC_VERSION} ${ARCH} ${ARCH}-linux-gnu"
+    sh -c "chmod a+x /work/do-build.sh && /work/do-build.sh ${BIGQUERY_VERSION} ${ARCH}-linux-gnu"
