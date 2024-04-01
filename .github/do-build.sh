@@ -17,6 +17,7 @@ case $TRIPLET in
 esac
 
 # ------------ Compile everything ------------
+cd /work
 make
 
 # ------------ create tarball ------------
