@@ -7,7 +7,7 @@ GOOGLE_CLOUD_CPP_VERSION = v2.22.0
 
 BUILD_DIR ?= $(shell pwd)/build
 INSTALL_PREFIX ?= $(shell pwd)/install
-CMAKE_CXX_STANDARD ?= 14
+CMAKE_CXX_STANDARD ?= 17
 
 THRID_PARTY_DIR = $(shell pwd)/third_party
 
@@ -57,7 +57,8 @@ config-abseil-cpp: fetch-abseil-cpp
 		cmake -S . -B "$(ABSEIL_CPP_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) ; \
+			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
+			-D ABSL_PROPAGATE_CXX_STD=ON ; \
 	fi
 
 install-abseil-cpp: config-abseil-cpp
@@ -80,7 +81,8 @@ config-grpc: fetch-grpc
 		cmake -S . -B "$(GRPC_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	; \
+			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
+			-D ABSL_PROPAGATE_CXX_STD=ON ; \
 	fi
 
 install-grpc: config-grpc
@@ -127,7 +129,8 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D OPENSSL_ROOT_DIR="$(INSTALL_PREFIX)/openssl" \
 			-D BUILD_TESTING=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
-			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery ; \
+			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
+			-D ABSL_PROPAGATE_CXX_STD=ON ; \
 	fi
 
 install-google-cloud-cpp: config-google-cloud-cpp
