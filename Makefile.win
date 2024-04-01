@@ -52,7 +52,7 @@ config-abseil-cpp: fetch-abseil-cpp
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
 			-D ABSL_PROPAGATE_CXX_STD=ON \
-            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
 	)
 
 install-abseil-cpp: config-abseil-cpp
@@ -76,7 +76,7 @@ config-grpc: fetch-grpc
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
 			-D ABSL_PROPAGATE_CXX_STD=ON \
-            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+            -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
     )
 
 install-grpc: config-grpc
@@ -103,7 +103,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D BUILD_TESTING=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
-			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
+			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
     )
 
 install-google-cloud-cpp: config-google-cloud-cpp
