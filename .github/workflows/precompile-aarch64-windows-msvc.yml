@@ -2,9 +2,6 @@ name: precompile-aarch64-windows-msvc
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'v*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
