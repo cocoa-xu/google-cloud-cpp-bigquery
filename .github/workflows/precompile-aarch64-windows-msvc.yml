@@ -40,7 +40,7 @@ jobs:
         run: |
           $Env:MSBUILD_PLATFORM="${{ env.MSBUILD_PLATFORM }}"
           $Env:CMAKE_TOOLCHAIN_FILE="$pwd\cc_toolchains\aarch64-windows-msvc.cmake"
-          $Env:CMAKE_GENERATOR_TYPE="NMake Makefiles"
+          $Env:CMAKE_GENERATOR_TYPE="Visual Studio 16 2019"
           Remove-Item Makefile -Force -ErrorAction SilentlyContinue
           nmake /F Makefile.win NPROC=2
 
