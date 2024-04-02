@@ -15,6 +15,12 @@ NPROC = 2
 CMAKE_GENERATOR_TYPE=Ninja
 !ENDIF
 
+!IFDEF CMAKE_TOOLCHAIN_FILE
+CMAKE_CONFIGURE_FLAGS = -G "$(CMAKE_GENERATOR_TYPE)" -A "$(MSBUILD_PLATFORM)" -D CMAKE_TOOLCHAIN_FILE="$(CMAKE_TOOLCHAIN_FILE)"
+!ELSE
+CMAKE_CONFIGURE_FLAGS = -G "$(CMAKE_GENERATOR_TYPE)"
+!ENDIF
+
 THRID_PARTY_DIR = $(MAKEDIR)\third_party
 
 ABSEIL_CPP_GIT_REPO = https://github.com/abseil/abseil-cpp.git
@@ -27,8 +33,14 @@ GRPC_SRC_DIR = $(THRID_PARTY_DIR)\grpc
 GRPC_BUILD_DIR = $(BUILD_DIR)\grpc
 GRPC_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\grpc\gRPCConfig.cmake
 
-OPENSSL_PRECOMPILED_URL = https://github.com/cocoa-xu/openssl-build/releases/download/v$(OPENSSL_VERSION)/openssl-static-x86_64-windows-msvc.tar.gz
+OPENSSL_PRECOMPILED_BASE_URL = https://github.com/cocoa-xu/openssl-build/releases/download/v$(OPENSSL_VERSION)
+!IF "$(MSBUILD_PLATFORM)" == "ARM64"
+OPENSSL_PRECOMPILED_URL = $(OPENSSL_PRECOMPILED_BASE_URL)/openssl-static-aarch64-windows-msvc.tar.gz
+OPENSSL_PRECOMPILED_TARBALL = $(THRID_PARTY_DIR)\openssl-static-aarch64-windows-msvc.tar.gz
+!ELSE
+OPENSSL_PRECOMPILED_URL = $(OPENSSL_PRECOMPILED_BASE_URL)/openssl-static-x86_64-windows-msvc.tar.gz
 OPENSSL_PRECOMPILED_TARBALL = $(THRID_PARTY_DIR)\openssl-static-x86_64-windows-msvc.tar.gz
+!ENDIF
 
 GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
@@ -60,7 +72,7 @@ config-abseil-cpp: fetch-abseil-cpp
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
 			-D ABSL_PROPAGATE_CXX_STD=ON \
             -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
-            -G "$(CMAKE_GENERATOR_TYPE)" \
+            $(CMAKE_CONFIGURE_FLAGS) \
 	)
 
 install-abseil-cpp: config-abseil-cpp
@@ -85,7 +97,7 @@ config-grpc: fetch-grpc
 			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
 			-D ABSL_PROPAGATE_CXX_STD=ON \
             -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
-            -G "$(CMAKE_GENERATOR_TYPE)" \
+            $(CMAKE_CONFIGURE_FLAGS) \
     )
 
 install-grpc: config-grpc
@@ -124,7 +136,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery \
 			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
-            -G "$(CMAKE_GENERATOR_TYPE)" \
+            $(CMAKE_CONFIGURE_FLAGS) \
     )
 
 install-google-cloud-cpp: config-google-cloud-cpp
