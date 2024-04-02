@@ -31,12 +31,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          choco install -y nasm
-          choco install -y ninja
-          choco install -y cmake
+          choco install -y nasm ninja cmake
       
       - name: Compile everything
         run: |
+          git config --system core.longpaths true
           nmake /F Makefile.win NPROC=2
 
       - name: Create tarball

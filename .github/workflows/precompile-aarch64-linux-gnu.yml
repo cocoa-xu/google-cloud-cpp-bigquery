@@ -49,5 +49,6 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
+          sudo rm -rf build install third_party
           sudo rm -rf bigquery-*.tar.gz bigquery-*.tar.gz.sha256
           sudo rm -rf script-to-build-gnu.sh do-build.sh

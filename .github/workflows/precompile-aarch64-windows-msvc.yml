@@ -13,10 +13,14 @@ permissions:
 jobs:
   aarch64-windows-msvc:
     name: aarch64-windows-msvc
-    runs-on: windows-2019
+    # using self-hosted runner
+    # because there's no easy way to cross-compile for ARM64 Windows on GitHub-hosted runners
+    # as it requires to run compiled binaries on ARM64 Windows to generate protobuf files
+    runs-on: self-hosted-aarch64-windows-msvc
     env:
       BIGQUERY_VERSION: "2.22.0"
       TRIPLET: "aarch64-windows-msvc"
+      CMAKE_GENERATOR_TYPE: "Visual Studio 17 2022"
       MSBUILD_PLATFORM: ARM64
 
     steps:
@@ -25,20 +29,15 @@ jobs:
 
       - uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: amd64_arm64
+          arch: arm64
 
       - name: Install dependencies
         run: |
-          choco install -y nasm
-          choco install -y ninja
-          choco install -y cmake
+          choco install -y nasm ninja cmake
 
       - name: Compile everything
         run: |
-          $Env:MSBUILD_PLATFORM="${{ env.MSBUILD_PLATFORM }}"
-          $Env:CMAKE_TOOLCHAIN_FILE="$pwd\cc_toolchains\aarch64-windows-msvc.cmake"
-          $Env:CMAKE_GENERATOR_TYPE="Visual Studio 16 2019"
-          Remove-Item Makefile -Force -ErrorAction SilentlyContinue
+          git config --system core.longpaths true
           nmake /F Makefile.win NPROC=2
 
       - name: Create tarball
