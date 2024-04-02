@@ -1,12 +1,15 @@
 # google-cloud-cpp-bigquery
-Precompiled Google Cloud bigquery C++ library.
+Precompiled Google Cloud bigquery C++ library, [googleapis/google-cloud-cpp](https://github.com/googleapis/google-cloud-cpp), for Linux, macOS, and Windows.
 
 Compiled with:
 
-- [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp), lts_2024_01_16
-- [grpc/grpc](https://github.com/grpc/grpc), v1.62.1
-- [openssl](https://openssl.org), 3.2.1; precompiled version from [cocoa-xu/openssl](https://github.com/cocoa-xu/openssl-build) is used for Windows.
-- [googleapis/google-cloud-cpp](https://github.com/googleapis/google-cloud-cpp), v2.22.0
+| Package           | Version |
+|-------------------|---------|
+| [abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) | lts_2024_01_16 |
+| [grpc/grpc](https://github.com/grpc/grpc) | v1.62.1 |
+| [openssl](https://openssl.org) | 3.2.1 |
+
+*Note: For Windows we're using precompiled OpenSSL binaries from [cocoa-xu/openssl-build](https://github.com/cocoa-xu/openssl-build).*
 
 ### Availability
 
