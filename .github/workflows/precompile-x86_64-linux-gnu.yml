@@ -42,3 +42,9 @@ jobs:
           files: |
             bigquery-*.tar.gz
             bigquery-*.tar.gz.sha256
+
+      - name: Cleanup
+        if: always()
+        run: |
+          sudo rm -rf bigquery-*.tar.gz bigquery-*.tar.gz.sha256
+          sudo rm -rf script-to-build-gnu.sh do-build.sh

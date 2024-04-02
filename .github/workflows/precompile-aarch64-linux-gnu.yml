@@ -36,6 +36,7 @@ jobs:
           cp .github/do-build.sh ./
 
           bash ./script-to-build-gnu.sh "${{ env.BIGQUERY_VERSION }}" "aarch64"
+          sudo rm -rf build install
 
       - uses: softprops/action-gh-release@v2
         with:
@@ -44,3 +45,9 @@ jobs:
           files: |
             bigquery-*.tar.gz
             bigquery-*.tar.gz.sha256
+
+      - name: Cleanup
+        if: always()
+        run: |
+          sudo rm -rf bigquery-*.tar.gz bigquery-*.tar.gz.sha256
+          sudo rm -rf script-to-build-gnu.sh do-build.sh
