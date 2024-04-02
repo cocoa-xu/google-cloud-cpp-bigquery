@@ -26,7 +26,7 @@ jobs:
 
       - name: Pull docker image
         run: |
-          sudo docker pull ubuntu:20.04
+          sudo docker pull -platform=linux/amd64 ubuntu:20.04
 
       - name: Precompile
         run: |
