@@ -6,6 +6,8 @@ BIGQUERY_VERSION=$1
 TRIPLET=$2
 PERFIX_DIR="/bigquery-${TRIPLET}"
 
+export DEBIAN_FRONTEND=noninteractive
+
 case $TRIPLET in
      *-linux-gnu )
           # yum install -y curl automake autoconf openssl-devel ncurses-devel perl-IPC-Cmd python3 cmake git
