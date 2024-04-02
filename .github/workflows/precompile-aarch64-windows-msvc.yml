@@ -40,7 +40,8 @@ jobs:
         shell: bash
         run: |
           export MSBUILD_PLATFORM="${{ env.MSBUILD_PLATFORM }}"
-          export CMAKE_TOOLCHAIN_FILE="$(pwd)/cc_toolchain/aarch64-windows-msvc.cmake"
+          export CMAKE_TOOLCHAIN_FILE="$(pwd)/cc_toolchains/aarch64-windows-msvc.cmake"
+          rm -f Makefile
           nmake /F Makefile.win NPROC=2
 
       - name: Create tarball
