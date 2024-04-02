@@ -16,6 +16,12 @@ NPROC = $(shell nproc)
 endif
 endif
 
+ifdef CMAKE_TOOLCHAIN_FILE
+	CMAKE_CONFIGURE_FLAGS=-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) -D CMAKE_TOOLCHAIN_FILE="$(CMAKE_TOOLCHAIN_FILE)"
+else
+	CMAKE_CONFIGURE_FLAGS=-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)
+endif
+
 THRID_PARTY_DIR = $(shell pwd)/third_party
 
 ABSEIL_CPP_GIT_REPO = https://github.com/abseil/abseil-cpp.git
@@ -60,7 +66,7 @@ config-abseil-cpp: fetch-abseil-cpp
 		cmake -S . -B "$(ABSEIL_CPP_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD) \
+			$(CMAKE_CONFIGURE_FLAGS) \
 			-D ABSL_PROPAGATE_CXX_STD=ON ; \
 	fi
 
@@ -84,7 +90,7 @@ config-grpc: fetch-grpc
 		cmake -S . -B "$(GRPC_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
+			$(CMAKE_CONFIGURE_FLAGS) \
 			-D ABSL_PROPAGATE_CXX_STD=ON ; \
 	fi
 
@@ -127,7 +133,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 		cmake -S . -B "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
-			-D CMAKE_CXX_STANDARD=$(CMAKE_CXX_STANDARD)	\
+			$(CMAKE_CONFIGURE_FLAGS) \
 			-D CMAKE_PREFIX_PATH="$(INSTALL_PREFIX)/lib/cmake" \
 			-D OPENSSL_ROOT_DIR="$(INSTALL_PREFIX)/openssl" \
 			-D BUILD_TESTING=OFF \
