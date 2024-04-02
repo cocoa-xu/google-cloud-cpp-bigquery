@@ -9,8 +9,11 @@ Compiled with:
 - [googleapis/google-cloud-cpp](https://github.com/googleapis/google-cloud-cpp), v2.22.0
 
 ### Availability
-- x86_64-linux-gnu
-- aarch64-linux-gnu
-- x86_64-apple-darwin
-- aaarch64-apple-darwin
-- x86_64-windows-msvc
+
+| OS                | Arch           | ABI    |
+|-------------------|----------------|--------|
+| Linux             | x86_64         | gnu    |
+| Linux             | aarch64        | gnu    |
+| macOS 12 Monterey | x86_64         | darwin |
+| macOS 14 Sonoma   | aarch64        | darwin |
+| Windows 2019      | x86_64         | msvc   |
