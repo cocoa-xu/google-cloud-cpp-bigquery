@@ -37,11 +37,11 @@ jobs:
           choco install -y cmake
 
       - name: Compile everything
-        shell: bash
         run: |
-          export MSBUILD_PLATFORM="${{ env.MSBUILD_PLATFORM }}"
-          export CMAKE_TOOLCHAIN_FILE="$(pwd)/cc_toolchains/aarch64-windows-msvc.cmake"
-          rm -f Makefile
+          $Env:MSBUILD_PLATFORM="${{ env.MSBUILD_PLATFORM }}"
+          $pwd=(Get-Location)
+          $Env:CMAKE_TOOLCHAIN_FILE=$pwd+"\cc_toolchains\aarch64-windows-msvc.cmake"
+          Remove-Item Makefile -Force -ErrorAction SilentlyContinue
           nmake /F Makefile.win NPROC=2
 
       - name: Create tarball
