@@ -16,31 +16,27 @@ permissions:
 jobs:
   aarch64-linux-gnu:
     name: aarch64-linux-gnu
-    runs-on: ubuntu-20.04
+    # using self-hosted runner
+    # because the default GitHub CI runner is way too slow
+    runs-on: self-hosted-aarch64-linux-gnu
     env:
       BIGQUERY_VERSION: "2.22.0"
-      TRIPLET: "aarch64-linux-gnu"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Pull docker image
         run: |
-          sudo apt update
-          sudo apt install -y cmake git curl \
-            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo docker pull quay.io/pypa/manylinux2014_aarch64:latest
 
-      - name: Compile everything
+      - name: Precompile
         run: |
-          make NPROC=2
+          cp .github/script-to-build-gnu.sh ./
+          cp .github/do-build.sh ./
 
-      - name: Create tarball
-        run: |
-          export FILENAME="bigquery-${{ env.BIGQUERY_VERSION }}-${{ env.TRIPLET }}"
-          tar -czf "${FILENAME}.tar.gz" -C install .
-          sha256sum "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"
-      
+          bash ./script-to-build-gnu.sh "${{ env.BIGQUERY_VERSION }}" "aarch64"
+
       - uses: softprops/action-gh-release@v2
         with:
           name: "v${{ env.BIGQUERY_VERSION }}"
