@@ -1,4 +1,4 @@
-name: precompile-macos
+name: precompile-x86_64-windows-msvc
 
 on:
   workflow_dispatch:
@@ -14,36 +14,37 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    name: ${{ matrix.job.arch }}-apple-darwin
-    runs-on: ${{ matrix.job.runner }}
+  x86_64-windows-msvc:
+    name: x86_64-windows-msvc
+    runs-on: windows-2019
     env:
       BIGQUERY_VERSION: "2.22.0"
-    strategy:
-      matrix:
-        job:
-          - { arch: x86_64, runner: macos-12 }
-          - { arch: aarch64, runner: macos-14 }
-      fail-fast: false
+      TRIPLET: "x86_64-windows-msvc"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Install dependencies
         run: |
-          brew install autoconf automake libtool shtool openssl
-
+          choco install -y nasm
+          choco install -y ninja
+          choco install -y cmake
+      
       - name: Compile everything
-        run: |          
-          make NPROC=2
+        run: |
+          nmake /F Makefile.win NPROC=2
 
       - name: Create tarball
+        shell: bash
         run: |
-          export TRIPLET="${{ matrix.job.arch }}-apple-darwin"
-          export FILENAME="bigquery-${{ env.BIGQUERY_VERSION }}-${TRIPLET}"
+          export FILENAME="bigquery-${{ env.BIGQUERY_VERSION }}-${{ env.TRIPLET }}"
           tar -czf "${FILENAME}.tar.gz" -C install .
-          shasum -a 256 "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"
+          sha256sum "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"
 
       - uses: softprops/action-gh-release@v2
         with:

@@ -22,7 +22,6 @@ make NPROC=2
 
 # ------------ create tarball ------------
 
-cd install
-tar -czf "/work/bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" .
-cd /work
-sha256sum "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz" | tee "bigquery-${BIGQUERY_VERSION}-${TRIPLET}.tar.gz.sha256"
+export FILENAME="bigquery-${BIGQUERY_VERSION}-${TRIPLET}"
+tar -czf "${FILENAME}.tar.gz" -C install .
+sha256sum "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"

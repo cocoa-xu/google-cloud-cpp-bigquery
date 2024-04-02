@@ -1,4 +1,4 @@
-name: precompile-macos
+name: precompile-aarch64-linux-gnu
 
 on:
   workflow_dispatch:
@@ -14,17 +14,12 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    name: ${{ matrix.job.arch }}-apple-darwin
-    runs-on: ${{ matrix.job.runner }}
+  aarch64-linux-gnu:
+    name: aarch64-linux-gnu
+    runs-on: ubuntu-20.04
     env:
       BIGQUERY_VERSION: "2.22.0"
-    strategy:
-      matrix:
-        job:
-          - { arch: x86_64, runner: macos-12 }
-          - { arch: aarch64, runner: macos-14 }
-      fail-fast: false
+      TRIPLET: "aarch64-linux-gnu"
 
     steps:
       - name: Checkout
@@ -32,19 +27,20 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install autoconf automake libtool shtool openssl
+          sudo apt update
+          sudo apt install -y cmake git curl \
+            gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
       - name: Compile everything
-        run: |          
+        run: |
           make NPROC=2
 
       - name: Create tarball
         run: |
-          export TRIPLET="${{ matrix.job.arch }}-apple-darwin"
-          export FILENAME="bigquery-${{ env.BIGQUERY_VERSION }}-${TRIPLET}"
+          export FILENAME="bigquery-${{ env.BIGQUERY_VERSION }}-${{ env.TRIPLET }}"
           tar -czf "${FILENAME}.tar.gz" -C install .
-          shasum -a 256 "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"
-
+          sha256sum "${FILENAME}.tar.gz" | tee "${FILENAME}.tar.gz.sha256"
+      
       - uses: softprops/action-gh-release@v2
         with:
           name: "v${{ env.BIGQUERY_VERSION }}"
