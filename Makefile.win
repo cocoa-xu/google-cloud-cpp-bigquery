@@ -93,13 +93,14 @@ $(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
 
 fetch-nlohmann-json:
 	@ if not exist "$(NLOHMANN_JSON_TARBALL_XZ)" ( \
-		curl -L $(NLOHMANN_JSON_TARBALL_URL) -o "$(NLOHMANN_JSON_TARBALL_XZ)" \
+		powershell -command "(New-Object Net.WebClient).DownloadFile('$(NLOHMANN_JSON_TARBALL_URL)','$(NLOHMANN_JSON_TARBALL_XZ)')" && \
 	)
 
 unarchive-nlohmann-json: fetch-nlohmann-json
 	@ if not exist "$(NLOHMANN_JSON_SRC_DIR)" ( \
 		mkdir "$(NLOHMANN_JSON_SRC_DIR)" && \
 		7z x "$(NLOHMANN_JSON_TARBALL_XZ)" && \
+		dir && \
 		tar -xf "$(NLOHMANN_JSON_TARBALL)" -C "$(NLOHMANN_JSON_SRC_DIR)" --strip-components=1 \
 	)
 
@@ -148,7 +149,7 @@ $(GRPC_CONFIG_CMAKE): install-grpc
 
 fetch-openssl:
     @ if not exist "$(OPENSSL_PRECOMPILED_TARBALL)" ( \
-        curl -L $(OPENSSL_PRECOMPILED_URL) -o "$(OPENSSL_PRECOMPILED_TARBALL)" \
+        powershell -command "(New-Object Net.WebClient).DownloadFile('$(OPENSSL_PRECOMPILED_URL)','$(OPENSSL_PRECOMPILED_TARBALL)')" \
     )
 
 install-openssl: fetch-openssl
