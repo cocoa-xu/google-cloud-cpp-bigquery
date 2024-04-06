@@ -80,7 +80,7 @@ nproc:
 $(THRID_PARTY_DIR):
 	@ if not exist "$(THRID_PARTY_DIR)" mkdir "$(THRID_PARTY_DIR)"
 
-build-deps: fetch-libcurl $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: unarchive-libcurl $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
 
 fetch-abseil-cpp:
 	@ if not exist "$(ABSEIL_CPP_SRC_DIR)" ( \
