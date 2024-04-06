@@ -71,7 +71,7 @@ GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)\google-cloud-cpp
 GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\google_cloud_cpp_bigquery\google_cloud_cpp_bigquery-config.cmake
 
-build: nproc $(THRID_PARTY_DIR) build-deps
+build: nproc $(INSTALL_PREFIX) $(THRID_PARTY_DIR) build-deps
 	@ echo "Build done"
 
 nproc:
@@ -79,6 +79,9 @@ nproc:
 
 $(THRID_PARTY_DIR):
 	@ if not exist "$(THRID_PARTY_DIR)" mkdir "$(THRID_PARTY_DIR)"
+
+$(INSTALL_PREFIX):
+	@ if not exist "$(INSTALL_PREFIX)" mkdir "$(INSTALL_PREFIX)"
 
 build-deps: unarchive-libcurl $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
 
@@ -139,12 +142,12 @@ install-nlohmann-json: config-nlohmann-json
 $(NLOHMANN_JSON_CONFIG_CMAKE): install-nlohmann-json
 
 fetch-libcurl:
-	@ if not exist "$(LIBCURL_ZIP_FILE)" ( \
+	if not exist "$(LIBCURL_ZIP_FILE)" ( \
 		powershell -command "(New-Object Net.WebClient).DownloadFile('$(LIBCURL_ZIP_URL)','$(LIBCURL_ZIP_FILE)')" \
 	)
 
 unarchive-libcurl: fetch-libcurl
-	@ if not exist "$(LIBCURL_DLL)" ( \
+	if not exist "$(LIBCURL_DLL)" ( \
 		cd "$(INSTALL_PREFIX)" && \
 		7z x "$(LIBCURL_ZIP_FILE)" && \
 		powershell -command Move-Item -Path "$(LIBCURL_ZIP_FILENAME)" -Destination "libcurl" && \
