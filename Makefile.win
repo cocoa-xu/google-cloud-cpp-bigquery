@@ -97,8 +97,7 @@ fetch-nlohmann-json:
 
 unarchive-nlohmann-json: fetch-nlohmann-json
 	if not exist "$(NLOHMANN_JSON_SRC_DIR)" ( \
-		mkdir "$(NLOHMANN_JSON_SRC_DIR)" && \
-		tar -xf "$(NLOHMANN_JSON_TARBALL)" -C "$(NLOHMANN_JSON_SRC_DIR)" \
+		7z x "$(NLOHMANN_JSON_TARBALL)" -o"$(NLOHMANN_JSON_SRC_DIR)" \
 	)
 
 config-nlohmann-json: unarchive-nlohmann-json

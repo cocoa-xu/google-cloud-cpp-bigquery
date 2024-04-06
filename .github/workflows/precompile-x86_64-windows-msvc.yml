@@ -31,8 +31,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          choco install -y nasm ninja cmake
-      
+          choco install -y nasm ninja cmake 7zip
+
       - name: Compile everything
         run: |
           git config --system core.longpaths true
