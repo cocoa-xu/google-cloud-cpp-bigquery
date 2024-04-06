@@ -139,7 +139,7 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D OPENSSL_ROOT_DIR="$(INSTALL_PREFIX)/openssl" \
 			-D BUILD_TESTING=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
-			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery ; \
+			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery,experimental-bigquery_rest ; \
 	fi
 
 install-google-cloud-cpp: config-google-cloud-cpp
