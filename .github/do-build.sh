@@ -12,7 +12,7 @@ case $TRIPLET in
      *-linux-gnu )
           # yum install -y curl automake autoconf openssl-devel ncurses-devel perl-IPC-Cmd python3 cmake git
           apt-get update
-          apt-get install -y curl automake autoconf libssl-dev libncurses5-dev perl python3 cmake git gcc g++ build-essential
+          apt-get install -y curl automake autoconf libssl-dev libncurses5-dev perl python3 cmake git gcc g++ build-essential libcurl4-openssl-dev
           ;;
      * )
           echo "Unknown triplet: ${TRIPLET}"
