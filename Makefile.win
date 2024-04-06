@@ -65,7 +65,7 @@ nproc:
 $(THRID_PARTY_DIR):
 	@ if not exist "$(THRID_PARTY_DIR)" mkdir "$(THRID_PARTY_DIR)"
 
-build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: $(NLOHMANN_JSON_CONFIG_CMAKE) $(ABSEIL_CPP_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
 
 fetch-abseil-cpp:
 	@ if not exist "$(ABSEIL_CPP_SRC_DIR)" ( \
@@ -93,7 +93,7 @@ $(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
 
 fetch-nlohmann-json:
 	@ if not exist "$(NLOHMANN_JSON_TARBALL_XZ)" ( \
-		powershell -command "(New-Object Net.WebClient).DownloadFile('$(NLOHMANN_JSON_TARBALL_URL)','$(NLOHMANN_JSON_TARBALL_XZ)')" && \
+		powershell -command "(New-Object Net.WebClient).DownloadFile('$(NLOHMANN_JSON_TARBALL_URL)','$(NLOHMANN_JSON_TARBALL_XZ)')" \
 	)
 
 unarchive-nlohmann-json: fetch-nlohmann-json
