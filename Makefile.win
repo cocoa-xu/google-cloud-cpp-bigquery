@@ -96,13 +96,13 @@ fetch-nlohmann-json:
 	)
 
 unarchive-nlohmann-json: fetch-nlohmann-json
-	@ if not exist "$(NLOHMANN_JSON_SRC_DIR)" ( \
+	if not exist "$(NLOHMANN_JSON_SRC_DIR)" ( \
 		mkdir "$(NLOHMANN_JSON_SRC_DIR)" && \
 		tar -xf "$(NLOHMANN_JSON_TARBALL)" -C "$(NLOHMANN_JSON_SRC_DIR)" \
 	)
 
 config-nlohmann-json: unarchive-nlohmann-json
-	@ if not exist "$(NLOHMANN_JSON_BUILD_DIR)" ( \
+	if not exist "$(NLOHMANN_JSON_BUILD_DIR)" ( \
 		cmake -S "$(NLOHMANN_JSON_SRC_DIR)" -B "$(NLOHMANN_JSON_BUILD_DIR)" \
 			-D CMAKE_BUILD_TYPE=Release \
 			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
@@ -113,7 +113,7 @@ config-nlohmann-json: unarchive-nlohmann-json
 	)
 
 install-nlohmann-json: config-nlohmann-json
-	@ if not exist "$(NLOHMANN_JSON_CONFIG_CMAKE)" ( \
+	if not exist "$(NLOHMANN_JSON_CONFIG_CMAKE)" ( \
 		cmake --build "$(NLOHMANN_JSON_BUILD_DIR)" --config Release --target install --parallel $(NPROC) \
 	)
 
