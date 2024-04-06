@@ -4,6 +4,7 @@ set -xe
 
 BIGQUERY_VERSION=$1
 TRIPLET=$2
+NPROC=${3:-2}
 PERFIX_DIR="/bigquery-${TRIPLET}"
 
 export DEBIAN_FRONTEND=noninteractive
@@ -22,7 +23,7 @@ esac
 
 # ------------ Compile everything ------------
 cd /work
-make NPROC=2
+make NPROC=${NPROC}
 
 # ------------ create tarball ------------
 

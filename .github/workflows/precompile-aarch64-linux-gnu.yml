@@ -35,6 +35,7 @@ jobs:
           cp .github/script-to-build-gnu.sh ./
           cp .github/do-build.sh ./
 
+          export NPROC=6
           bash ./script-to-build-gnu.sh "${{ env.BIGQUERY_VERSION }}" "aarch64"
           sudo rm -rf build install
 
