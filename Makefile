@@ -30,6 +30,14 @@ ABSEIL_CPP_SRC_DIR = $(THRID_PARTY_DIR)/abseil-cpp
 ABSEIL_CPP_BUILD_DIR = $(BUILD_DIR)/abseil-cpp
 ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/absl/abslConfig.cmake
 
+NLOHMANN_JSON_VERSION = 3.11.3
+NLOHMANN_JSON_BASE_URL = https://github.com/nlohmann/json/releases/download
+NLOHMANN_JSON_TARBALL_URL = $(NLOHMANN_JSON_BASE_URL)/v$(NLOHMANN_JSON_VERSION)/json.tar.xz
+NLOHMANN_JSON_TARBALL = $(THRID_PARTY_DIR)/nlohmann-json-$(NLOHMANN_JSON_VERSION).tar.xz
+NLOHMANN_JSON_SRC_DIR = $(THRID_PARTY_DIR)/nlohmann-json-$(NLOHMANN_JSON_VERSION)
+NLOHMANN_JSON_BUILD_DIR = $(BUILD_DIR)/nlohmann_json
+NLOHMANN_JSON_CONFIG_CMAKE = $(INSTALL_PREFIX)/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake
+
 GRPC_GIT_REPO = https://github.com/grpc/grpc.git
 GRPC_SRC_DIR = $(THRID_PARTY_DIR)/grpc
 GRPC_BUILD_DIR = $(BUILD_DIR)/grpc
@@ -53,7 +61,7 @@ nproc:
 $(THRID_PARTY_DIR):
 	@ mkdir -p "$(THRID_PARTY_DIR)"
 
-build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
 	@ echo > /dev/null
 
 fetch-abseil-cpp:
@@ -77,6 +85,34 @@ install-abseil-cpp: config-abseil-cpp
 	fi
 
 $(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
+	@ echo > /dev/null
+
+fetch-nlohmann-json:
+	@ if [ ! -f "$(NLOHMANN_JSON_TARBALL)" ]; then \
+		curl -fSL "$(NLOHMANN_JSON_TARBALL_URL)" -o "$(NLOHMANN_JSON_TARBALL)" ; \
+	fi
+
+unarchive-nlohmann-json: fetch-nlohmann-json
+	@ if [ ! -d "$(NLOHMANN_JSON_SRC_DIR)" ]; then \
+		mkdir -p "$(NLOHMANN_JSON_SRC_DIR)" && \
+		tar -xJf "$(NLOHMANN_JSON_TARBALL)" -C "$(NLOHMANN_JSON_SRC_DIR)" --strip-components=1 ; \
+	fi
+
+config-nlohmann-json: unarchive-nlohmann-json
+	@ if [ ! -d "$(NLOHMANN_JSON_BUILD_DIR)" ]; then \
+		cmake -S "$(NLOHMANN_JSON_SRC_DIR)" -B "$(NLOHMANN_JSON_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			-D JSON_BuildTests=OFF \
+			$(CMAKE_CONFIGURE_FLAGS) ; \
+	fi
+
+install-nlohmann-json: config-nlohmann-json
+	@ if [ ! -f "$(NLOHMANN_JSON_CONFIG_CMAKE)" ]; then \
+		cmake --build "$(NLOHMANN_JSON_BUILD_DIR)" --config Release --target install --parallel $(NPROC) ; \
+	fi
+
+$(NLOHMANN_JSON_CONFIG_CMAKE): install-nlohmann-json
 	@ echo > /dev/null
 
 fetch-grpc:
