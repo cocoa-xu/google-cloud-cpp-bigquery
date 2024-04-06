@@ -37,6 +37,21 @@ NLOHMANN_JSON_SRC_DIR = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION
 NLOHMANN_JSON_BUILD_DIR = $(BUILD_DIR)\nlohmann_json
 NLOHMANN_JSON_CONFIG_CMAKE = $(INSTALL_PREFIX)\share\cmake\nlohmann_json\nlohmann_jsonConfig.cmake
 
+LIBCURL_VERSION = 8.7.1
+LIBCURL_BUILD = 7
+LIBCURL_VERSION_BUILD = $(LIBCURL_VERSION)_$(LIBCURL_BUILD)
+LIBCURL_BASE_URL = https://curl.se/windows
+LIBCURL_INSTALL_DIR = $(INSTALL_PREFIX)\libcurl
+!IF "$(MSBUILD_PLATFORM)" == "ARM64"
+LIBCURL_ZIP_FILENAME = curl-$(LIBCURL_VERSION_BUILD)-win64a-mingw
+LIBCURL_DLL = $(LIBCURL_INSTALL_DIR)\bin\libcurl-arm64.dll
+!ELSE
+LIBCURL_ZIP_FILENAME = curl-$(LIBCURL_VERSION_BUILD)-win64-mingw
+LIBCURL_DLL = $(LIBCURL_INSTALL_DIR)\bin\libcurl-x64.dll
+!ENDIF
+LIBCURL_ZIP_FILE = $(THRID_PARTY_DIR)\$(LIBCURL_ZIP_FILENAME).zip
+LIBCURL_ZIP_URL = $(LIBCURL_BASE_URL)/dl-$(LIBCURL_VERSION_BUILD)/$(LIBCURL_ZIP_FILENAME).zip
+
 GRPC_GIT_REPO = https://github.com/grpc/grpc.git
 GRPC_SRC_DIR = $(THRID_PARTY_DIR)\grpc
 GRPC_BUILD_DIR = $(BUILD_DIR)\grpc
@@ -65,7 +80,7 @@ nproc:
 $(THRID_PARTY_DIR):
 	@ if not exist "$(THRID_PARTY_DIR)" mkdir "$(THRID_PARTY_DIR)"
 
-build-deps: $(NLOHMANN_JSON_CONFIG_CMAKE) $(ABSEIL_CPP_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: fetch-libcurl $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
 
 fetch-abseil-cpp:
 	@ if not exist "$(ABSEIL_CPP_SRC_DIR)" ( \
@@ -123,6 +138,19 @@ install-nlohmann-json: config-nlohmann-json
 
 $(NLOHMANN_JSON_CONFIG_CMAKE): install-nlohmann-json
 
+fetch-libcurl:
+	@ if not exist "$(LIBCURL_ZIP_FILE)" ( \
+		powershell -command "(New-Object Net.WebClient).DownloadFile('$(LIBCURL_ZIP_URL)','$(LIBCURL_ZIP_FILE)')" \
+	)
+
+unarchive-libcurl: fetch-libcurl
+	@ if not exist "$(LIBCURL_DLL)" ( \
+		cd "$(INSTALL_PREFIX)" && \
+		7z x "$(LIBCURL_ZIP_FILE)" && \
+		powershell -command Move-Item -Path "$(LIBCURL_ZIP_FILENAME)" -Destination "libcurl" && \
+		dir libcurl \
+	)
+
 fetch-grpc:
     @ if not exist "$(GRPC_SRC_DIR)" ( \
         git clone $(GRPC_GIT_REPO) "$(GRPC_SRC_DIR)" \
@@ -177,6 +205,8 @@ config-google-cloud-cpp: fetch-google-cloud-cpp
 			-D GOOGLE_CLOUD_CPP_ENABLE_EXAMPLES=OFF \
 			-D GOOGLE_CLOUD_CPP_ENABLE=bigquery,experimental-bigquery_rest \
 			-D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" \
+			-D CURL_LIBRARY="$(LIBCURL_DLL)" \
+			-D CURL_INCLUDE_DIR="$(LIBCURL_INSTALL_DIR)/include" \
             $(CMAKE_CONFIGURE_FLAGS) \
     )
 
