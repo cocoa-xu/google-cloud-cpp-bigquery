@@ -31,7 +31,8 @@ ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\absl\abslConfig.cmake
 NLOHMANN_JSON_VERSION = 3.11.3
 NLOHMANN_JSON_BASE_URL = https://github.com/nlohmann/json/releases/download
 NLOHMANN_JSON_TARBALL_URL = $(NLOHMANN_JSON_BASE_URL)/v$(NLOHMANN_JSON_VERSION)/json.tar.xz
-NLOHMANN_JSON_TARBALL = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION).tar.xz
+NLOHMANN_JSON_TARBALL = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION).tar
+NLOHMANN_JSON_TARBALL_XZ = $(NLOHMANN_JSON_TARBALL).xz
 NLOHMANN_JSON_SRC_DIR = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION)
 NLOHMANN_JSON_BUILD_DIR = $(BUILD_DIR)\nlohmann_json
 NLOHMANN_JSON_CONFIG_CMAKE = $(INSTALL_PREFIX)\share\cmake\nlohmann_json\nlohmann_jsonConfig.cmake
@@ -91,14 +92,14 @@ install-abseil-cpp: config-abseil-cpp
 $(ABSEIL_CPP_CONFIG_CMAKE): install-abseil-cpp
 
 fetch-nlohmann-json:
-	@ if not exist "$(NLOHMANN_JSON_TARBALL)" ( \
-		curl -L $(NLOHMANN_JSON_TARBALL_URL) -o "$(NLOHMANN_JSON_TARBALL)" \
+	@ if not exist "$(NLOHMANN_JSON_TARBALL_XZ)" ( \
+		curl -L $(NLOHMANN_JSON_TARBALL_URL) -o "$(NLOHMANN_JSON_TARBALL_XZ)" \
 	)
 
 unarchive-nlohmann-json: fetch-nlohmann-json
 	@ if not exist "$(NLOHMANN_JSON_SRC_DIR)" ( \
 		mkdir "$(NLOHMANN_JSON_SRC_DIR)" && \
-		7z x "$(NLOHMANN_JSON_TARBALL)" && \
+		7z x "$(NLOHMANN_JSON_TARBALL_XZ)" && \
 		tar -xf "$(NLOHMANN_JSON_TARBALL)" -C "$(NLOHMANN_JSON_SRC_DIR)" --strip-components=1 \
 	)
 
