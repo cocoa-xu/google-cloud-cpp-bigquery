@@ -193,8 +193,7 @@ clean-grpc:
 	rm -rf "$(GRPC_BUILD_DIR)"
 
 clean-openssl:
-	@ cd "$(OPENSSL_SRC_DIR)"
-	make clean
+	rm -rf "$(OPENSSL_SRC_DIR)"
 
 clean-google-cloud-cpp:
 	rm -rf "$(GOOGLE_CLOUD_CPP_BUILD_DIR)"
