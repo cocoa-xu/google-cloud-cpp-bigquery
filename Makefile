@@ -1,7 +1,9 @@
 ABSEIL_CPP_VERSION = lts_2024_01_16
+NLOHMANN_JSON_VERSION = 3.11.3
 GRPC_VERSION = v1.62.1
 OPENSSL_VERSION = 3.2.1
 GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+APACHE_ARROW_VERSION = 15.0.2
 
 BUILD_DIR ?= $(shell pwd)/build
 INSTALL_PREFIX ?= $(shell pwd)/install
@@ -30,7 +32,6 @@ ABSEIL_CPP_SRC_DIR = $(THRID_PARTY_DIR)/abseil-cpp
 ABSEIL_CPP_BUILD_DIR = $(BUILD_DIR)/abseil-cpp
 ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/absl/abslConfig.cmake
 
-NLOHMANN_JSON_VERSION = 3.11.3
 NLOHMANN_JSON_BASE_URL = https://github.com/nlohmann/json/releases/download
 NLOHMANN_JSON_TARBALL_URL = $(NLOHMANN_JSON_BASE_URL)/v$(NLOHMANN_JSON_VERSION)/json.tar.xz
 NLOHMANN_JSON_TARBALL = $(THRID_PARTY_DIR)/nlohmann-json-$(NLOHMANN_JSON_VERSION).tar.xz
@@ -52,6 +53,14 @@ GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)/google-cloud-cpp
 GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/google_cloud_cpp_bigquery/google_cloud_cpp_bigquery-config.cmake
 
+APACHE_ARROW_TARBALL_NAME = apache-arrow-$(APACHE_ARROW_VERSION)
+APACHE_ARROW_URL = https://github.com/apache/arrow/archive/refs/tags/$(APACHE_ARROW_TARBALL_NAME).tar.gz
+APACHE_ARROW_TARBALL = $(THRID_PARTY_DIR)/$(APACHE_ARROW_TARBALL_NAME).tar.gz
+APACHE_ARROW_SRC_DIR = $(THRID_PARTY_DIR)/$(APACHE_ARROW_TARBALL_NAME)
+APACHE_ARROW_CPP_SRC_DIR = $(APACHE_ARROW_SRC_DIR)/cpp
+APACHE_ARROW_BUILD_DIR = $(BUILD_DIR)/apache_arrow
+APACHE_ARROW_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/Arrow/ArrowConfig.cmake
+
 build: nproc $(THRID_PARTY_DIR) build-deps
 	@ echo "Build done"
 
@@ -61,7 +70,7 @@ nproc:
 $(THRID_PARTY_DIR):
 	@ mkdir -p "$(THRID_PARTY_DIR)"
 
-build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE) $(APACHE_ARROW_CONFIG_CMAKE)
 	@ echo > /dev/null
 
 fetch-abseil-cpp:
@@ -186,6 +195,39 @@ install-google-cloud-cpp: config-google-cloud-cpp
 $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE): install-google-cloud-cpp
 	@ echo > /dev/null
 
+fetch-apache-arrow:
+	@ if [ ! -f "$(APACHE_ARROW_TARBALL)" ]; then \
+		curl -fSL "$(APACHE_ARROW_URL)" -o "$(APACHE_ARROW_TARBALL)" ; \
+	fi
+
+unarchive-apache-arrow: fetch-apache-arrow
+	@ if [ ! -d "$(APACHE_ARROW_SRC_DIR)" ]; then \
+		mkdir -p "$(APACHE_ARROW_SRC_DIR)" && \
+		tar -xzf "$(APACHE_ARROW_TARBALL)" -C "$(APACHE_ARROW_SRC_DIR)" --strip-components=1 ; \
+	fi
+
+config-apache-arrow: unarchive-apache-arrow
+	@ if [ ! -d "$(APACHE_ARROW_BUILD_DIR)" ]; then \
+		cmake -S "$(APACHE_ARROW_CPP_SRC_DIR)" -B "$(APACHE_ARROW_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			$(CMAKE_CONFIGURE_FLAGS) \
+			-D ARROW_BUILD_TESTS=OFF \
+			-D ARROW_BUILD_UTILITIES=OFF \
+			-D ARROW_BUILD_SHARED=OFF \
+			-D ARROW_BUILD_STATIC=ON \
+			-D ARROW_IPC=ON \
+			-D ARROW_ENABLE_TIMING_TESTS=OFF ; \
+	fi
+
+install-apache-arrow: config-apache-arrow
+	@ if [ ! -f "$(APACHE_ARROW_CONFIG_CMAKE)" ]; then \
+		cmake --build "$(APACHE_ARROW_BUILD_DIR)" --config Release --target install --parallel $(NPROC) ; \
+	fi
+
+$(APACHE_ARROW_CONFIG_CMAKE): install-apache-arrow
+	@ echo > /dev/null
+
 clean-abseil-cpp:
 	rm -rf "$(ABSEIL_CPP_BUILD_DIR)"
 
@@ -198,5 +240,8 @@ clean-openssl:
 clean-google-cloud-cpp:
 	rm -rf "$(GOOGLE_CLOUD_CPP_BUILD_DIR)"
 
-clean: clean-abseil-cpp clean-grpc clean-openssl clean-google-cloud-cpp
+clean-apache-arrow:
+	rm -rf "$(APACHE_ARROW_BUILD_DIR)"
+
+clean: clean-abseil-cpp clean-grpc clean-openssl clean-google-cloud-cpp clean-apache-arrow
 	@ echo > /dev/null

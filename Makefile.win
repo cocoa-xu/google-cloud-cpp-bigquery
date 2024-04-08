@@ -1,7 +1,11 @@
 ABSEIL_CPP_VERSION = lts_2024_01_16
+NLOHMANN_JSON_VERSION = 3.11.3
+LIBCURL_VERSION = 8.7.1
+LIBCURL_BUILD = 7
 GRPC_VERSION = v1.62.1
 OPENSSL_VERSION = 3.2.1
 GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+APACHE_ARROW_VERSION = 15.0.2
 
 BUILD_DIR = $(MAKEDIR)\build
 INSTALL_PREFIX = $(MAKEDIR)\install
@@ -28,7 +32,6 @@ ABSEIL_CPP_SRC_DIR = $(THRID_PARTY_DIR)\abseil-cpp
 ABSEIL_CPP_BUILD_DIR = $(BUILD_DIR)\abseil-cpp
 ABSEIL_CPP_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\absl\abslConfig.cmake
 
-NLOHMANN_JSON_VERSION = 3.11.3
 NLOHMANN_JSON_BASE_URL = https://github.com/nlohmann/json/releases/download
 NLOHMANN_JSON_TARBALL_URL = $(NLOHMANN_JSON_BASE_URL)/v$(NLOHMANN_JSON_VERSION)/json.tar.xz
 NLOHMANN_JSON_TARBALL = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION).tar
@@ -37,8 +40,6 @@ NLOHMANN_JSON_SRC_DIR = $(THRID_PARTY_DIR)\nlohmann-json-$(NLOHMANN_JSON_VERSION
 NLOHMANN_JSON_BUILD_DIR = $(BUILD_DIR)\nlohmann_json
 NLOHMANN_JSON_CONFIG_CMAKE = $(INSTALL_PREFIX)\share\cmake\nlohmann_json\nlohmann_jsonConfig.cmake
 
-LIBCURL_VERSION = 8.7.1
-LIBCURL_BUILD = 7
 LIBCURL_VERSION_BUILD = $(LIBCURL_VERSION)_$(LIBCURL_BUILD)
 LIBCURL_BASE_URL = https://curl.se/windows
 LIBCURL_INSTALL_DIR = $(INSTALL_PREFIX)\libcurl
@@ -71,6 +72,14 @@ GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
 GOOGLE_CLOUD_CPP_BUILD_DIR = $(BUILD_DIR)\google-cloud-cpp
 GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\google_cloud_cpp_bigquery\google_cloud_cpp_bigquery-config.cmake
 
+APACHE_ARROW_TARBALL_NAME = apache-arrow-$(APACHE_ARROW_VERSION)
+APACHE_ARROW_URL = https://github.com/apache/arrow/archive/refs/tags/$(APACHE_ARROW_TARBALL_NAME).tar.gz
+APACHE_ARROW_TARBALL = $(THRID_PARTY_DIR)\$(APACHE_ARROW_TARBALL_NAME).tar.gz
+APACHE_ARROW_SRC_DIR = $(THRID_PARTY_DIR)\$(APACHE_ARROW_TARBALL_NAME)
+APACHE_ARROW_CPP_SRC_DIR = $(APACHE_ARROW_SRC_DIR)\cpp
+APACHE_ARROW_BUILD_DIR = $(BUILD_DIR)\apache_arrow
+APACHE_ARROW_CONFIG_CMAKE = $(INSTALL_PREFIX)\lib\cmake\Arrow\ArrowConfig.cmake
+
 build: nproc $(INSTALL_PREFIX) $(THRID_PARTY_DIR) build-deps
 	@ echo "Build done"
 
@@ -83,7 +92,7 @@ $(THRID_PARTY_DIR):
 $(INSTALL_PREFIX):
 	@ if not exist "$(INSTALL_PREFIX)" mkdir "$(INSTALL_PREFIX)"
 
-build-deps: unarchive-libcurl $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)
+build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) unarchive-libcurl $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE) $(APACHE_ARROW_CONFIG_CMAKE)
 
 fetch-abseil-cpp:
 	@ if not exist "$(ABSEIL_CPP_SRC_DIR)" ( \
@@ -219,3 +228,35 @@ install-google-cloud-cpp: config-google-cloud-cpp
     )
 
 $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE): install-google-cloud-cpp
+
+fetch-apache-arrow:
+	@ if not exist "$(APACHE_ARROW_TARBALL)" ( \
+		powershell -command "(New-Object Net.WebClient).DownloadFile('$(APACHE_ARROW_URL)','$(APACHE_ARROW_TARBALL)')" \
+	)
+
+unarchive-apache-arrow: fetch-apache-arrow
+	@ if not exist "$(APACHE_ARROW_SRC_DIR)" ( \
+		mkdir "$(APACHE_ARROW_SRC_DIR)" && \
+		tar -xf "$(APACHE_ARROW_TARBALL)" -C "$(APACHE_ARROW_SRC_DIR)" --strip-components=1 \
+	)
+
+config-apache-arrow: unarchive-apache-arrow
+	@ if not exist "$(APACHE_ARROW_BUILD_DIR)" ( \
+		cmake -S "$(APACHE_ARROW_CPP_SRC_DIR)" -B "$(APACHE_ARROW_BUILD_DIR)" \
+			-D CMAKE_BUILD_TYPE=Release \
+			-D CMAKE_INSTALL_PREFIX="$(INSTALL_PREFIX)" \
+			$(CMAKE_CONFIGURE_FLAGS) \
+			-D ARROW_BUILD_TESTS=OFF \
+			-D ARROW_BUILD_UTILITIES=OFF \
+			-D ARROW_BUILD_SHARED=OFF \
+			-D ARROW_BUILD_STATIC=ON \
+			-D ARROW_IPC=ON \
+			-D ARROW_ENABLE_TIMING_TESTS=OFF ; \
+	)
+
+install-apache-arrow: config-apache-arrow
+	if not exist "$(APACHE_ARROW_CONFIG_CMAKE)" ( \
+		cmake --build "$(APACHE_ARROW_BUILD_DIR)" --config Release --target install --parallel $(NPROC) \
+	)
+
+$(APACHE_ARROW_CONFIG_CMAKE): install-apache-arrow
