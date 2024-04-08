@@ -61,14 +61,25 @@ APACHE_ARROW_CPP_SRC_DIR = $(APACHE_ARROW_SRC_DIR)/cpp
 APACHE_ARROW_BUILD_DIR = $(BUILD_DIR)/apache_arrow
 APACHE_ARROW_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/Arrow/ArrowConfig.cmake
 
-build: nproc $(THRID_PARTY_DIR) build-deps
+build: nproc show-versions $(THRID_PARTY_DIR) $(INSTALL_PREFIX)  build-deps
 	@ echo "Build done"
 
 nproc:
 	@ echo "Parallel Jobs: $(NPROC)"
 
+show-versions:
+	@ echo "ABSEIL_CPP_VERSION: $(ABSEIL_CPP_VERSION)"
+	@ echo "NLOHMANN_JSON_VERSION: $(NLOHMANN_JSON_VERSION)"
+	@ echo "GRPC_VERSION: $(GRPC_VERSION)"
+	@ echo "OPENSSL_VERSION: $(OPENSSL_VERSION)"
+	@ echo "GOOGLE_CLOUD_CPP_VERSION: $(GOOGLE_CLOUD_CPP_VERSION)"
+	@ echo "APACHE_ARROW_VERSION: $(APACHE_ARROW_VERSION)"
+
 $(THRID_PARTY_DIR):
 	@ mkdir -p "$(THRID_PARTY_DIR)"
+
+$(INSTALL_PREFIX):
+	@ mkdir -p "$(INSTALL_PREFIX)"
 
 build-deps: $(ABSEIL_CPP_CONFIG_CMAKE) $(NLOHMANN_JSON_CONFIG_CMAKE) $(GRPC_CONFIG_CMAKE) install-openssl $(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE) $(APACHE_ARROW_CONFIG_CMAKE)
 	@ echo > /dev/null
