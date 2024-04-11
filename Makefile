@@ -3,6 +3,7 @@ NLOHMANN_JSON_VERSION = 3.11.3
 GRPC_VERSION = v1.62.1
 OPENSSL_VERSION = 3.2.1
 GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+BIGQUERY_REST_CPP_PATCH_VERSION = $(GOOGLE_CLOUD_CPP_VERSION)
 APACHE_ARROW_VERSION = 15.0.2
 
 BUILD_DIR ?= $(shell pwd)/build
@@ -47,6 +48,11 @@ GRPC_CONFIG_CMAKE = $(INSTALL_PREFIX)/lib/cmake/grpc/gRPCConfig.cmake
 OPENSSL_TARBALL = $(THRID_PARTY_DIR)/openssl-$(OPENSSL_VERSION).tar.gz
 OPENSSL_SRC_DIR = $(THRID_PARTY_DIR)/openssl-$(OPENSSL_VERSION)
 OPENSSL_INSTALL_PREFIX = $(INSTALL_PREFIX)/openssl
+
+BIGQUERY_REST_CPP_PATCH_URL = https://github.com/cocoa-xu/bigquery-rest-cpp/archive/refs/tags/$(BIGQUERY_REST_CPP_PATCH_VERSION).tar.gz
+BIGQUERY_REST_CPP_PATCH_TARBALL_NAME = bigquery-rest-cpp-patch-$(BIGQUERY_REST_CPP_PATCH_VERSION).tar.gz
+BIGQUERY_REST_CPP_PATCH_TARBALL = $(THRID_PARTY_DIR)/$(BIGQUERY_REST_CPP_PATCH_TARBALL_NAME)
+BIGQUERY_REST_CPP_PATCH_SRC_DIR = $(THRID_PARTY_DIR)/bigquery-rest-cpp-patch-$(BIGQUERY_REST_CPP_PATCH_VERSION)
 
 GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)/google-cloud-cpp
@@ -184,7 +190,20 @@ fetch-google-cloud-cpp:
 		git clone --depth=1 --branch $(GOOGLE_CLOUD_CPP_VERSION) $(GOOGLE_CLOUD_CPP_GIT_REPO) "$(GOOGLE_CLOUD_CPP_SRC_DIR)" ; \
 	fi
 
-config-google-cloud-cpp: fetch-google-cloud-cpp
+fetch-bigquery-rest-api-patch:
+	@ if [ ! -f "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" ]; then \
+		curl -fSL "$(BIGQUERY_REST_CPP_PATCH_URL)" -o "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" ; \
+	fi
+
+apply-bigquery-rest-api-patch: fetch-bigquery-rest-api-patch
+	@ if [ ! -d "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" ]; then \
+		mkdir -p "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" && \
+		tar -xzf "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" -C "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" --strip-components=1 && \
+		rm -rf "$(GOOGLE_CLOUD_CPP_SRC_DIR)/google/cloud/bigquery/v2/minimal/internal" && \
+		cp -rf "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)/google/cloud/bigquery/v2/minimal/internal" "$(GOOGLE_CLOUD_CPP_SRC_DIR)/google/cloud/bigquery/v2/minimal/internal" ; \
+	fi
+
+config-google-cloud-cpp: fetch-google-cloud-cpp apply-bigquery-rest-api-patch
 	@ if [ ! -f "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ]; then \
 		cd "$(GOOGLE_CLOUD_CPP_SRC_DIR)" && \
 		cmake -S . -B "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" \

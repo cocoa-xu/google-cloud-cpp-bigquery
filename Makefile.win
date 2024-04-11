@@ -5,6 +5,7 @@ LIBCURL_BUILD = 7
 GRPC_VERSION = v1.62.1
 OPENSSL_VERSION = 3.2.1
 GOOGLE_CLOUD_CPP_VERSION = v2.22.0
+BIGQUERY_REST_CPP_PATCH_VERSION = $(GOOGLE_CLOUD_CPP_VERSION)
 APACHE_ARROW_VERSION = 15.0.2
 
 BUILD_DIR = $(MAKEDIR)\build
@@ -66,6 +67,11 @@ OPENSSL_PRECOMPILED_TARBALL=$(THRID_PARTY_DIR)\openssl-static-aarch64-windows-ms
 OPENSSL_PRECOMPILED_URL=$(OPENSSL_PRECOMPILED_BASE_URL)/openssl-static-x86_64-windows-msvc.tar.gz
 OPENSSL_PRECOMPILED_TARBALL=$(THRID_PARTY_DIR)\openssl-static-x86_64-windows-msvc.tar.gz
 !ENDIF
+
+BIGQUERY_REST_CPP_PATCH_URL = https://github.com/cocoa-xu/bigquery-rest-cpp/archive/refs/tags/$(BIGQUERY_REST_CPP_PATCH_VERSION).tar.gz
+BIGQUERY_REST_CPP_PATCH_TARBALL_NAME = bigquery-rest-cpp-patch-$(BIGQUERY_REST_CPP_PATCH_VERSION).tar.gz
+BIGQUERY_REST_CPP_PATCH_TARBALL = $(THRID_PARTY_DIR)\$(BIGQUERY_REST_CPP_PATCH_TARBALL_NAME)
+BIGQUERY_REST_CPP_PATCH_SRC_DIR = $(THRID_PARTY_DIR)\bigquery-rest-cpp-patch-$(BIGQUERY_REST_CPP_PATCH_VERSION)
 
 GOOGLE_CLOUD_CPP_GIT_REPO = https://github.com/googleapis/google-cloud-cpp.git
 GOOGLE_CLOUD_CPP_SRC_DIR = $(THRID_PARTY_DIR)\google-cloud-cpp
@@ -212,7 +218,20 @@ fetch-google-cloud-cpp:
 		git clone --depth=1 --branch $(GOOGLE_CLOUD_CPP_VERSION) $(GOOGLE_CLOUD_CPP_GIT_REPO) "$(GOOGLE_CLOUD_CPP_SRC_DIR)" \
     )
 
-config-google-cloud-cpp: fetch-google-cloud-cpp
+fetch-bigquery-rest-api-patch:
+	@ if [ ! -f "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" ]; then \
+		powershell -command "(New-Object Net.WebClient).DownloadFile('$(BIGQUERY_REST_CPP_PATCH_URL)','$(BIGQUERY_REST_CPP_PATCH_TARBALL)')" \
+	fi
+
+apply-bigquery-rest-api-patch: fetch-bigquery-rest-api-patch
+	@ if [ ! -d "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" ]; then \
+		mkdir "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" && \
+		tar -xf "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" -C "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" --strip-components=1 && \
+		powershell -command "Remove-Item -Path $(GOOGLE_CLOUD_CPP_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Recurse -Force -ErrorAction SilentlyContinue" && \
+		powershell -command "Copy-Item -Path $(BIGQUERY_REST_CPP_PATCH_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Destination $(GOOGLE_CLOUD_CPP_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Recurse" ; \
+	fi
+
+config-google-cloud-cpp: fetch-google-cloud-cpp apply-bigquery-rest-api-patch
     @ if not exist "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ( \
 		cd "$(GOOGLE_CLOUD_CPP_SRC_DIR)" && \
 		cmake -S . -B "$(GOOGLE_CLOUD_CPP_BUILD_DIR)" \
