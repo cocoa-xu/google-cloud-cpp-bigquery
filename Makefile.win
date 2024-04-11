@@ -219,17 +219,17 @@ fetch-google-cloud-cpp:
     )
 
 fetch-bigquery-rest-api-patch:
-	@ if [ ! -f "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" ]; then \
+	@ if not exist "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" ( \
 		powershell -command "(New-Object Net.WebClient).DownloadFile('$(BIGQUERY_REST_CPP_PATCH_URL)','$(BIGQUERY_REST_CPP_PATCH_TARBALL)')" \
-	fi
+	)
 
 apply-bigquery-rest-api-patch: fetch-bigquery-rest-api-patch
-	@ if [ ! -d "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" ]; then \
+	@ if not exist "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" ( \
 		mkdir "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" && \
 		tar -xf "$(BIGQUERY_REST_CPP_PATCH_TARBALL)" -C "$(BIGQUERY_REST_CPP_PATCH_SRC_DIR)" --strip-components=1 && \
 		powershell -command "Remove-Item -Path $(GOOGLE_CLOUD_CPP_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Recurse -Force -ErrorAction SilentlyContinue" && \
-		powershell -command "Copy-Item -Path $(BIGQUERY_REST_CPP_PATCH_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Destination $(GOOGLE_CLOUD_CPP_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Recurse" ; \
-	fi
+		powershell -command "Copy-Item -Path $(BIGQUERY_REST_CPP_PATCH_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Destination $(GOOGLE_CLOUD_CPP_SRC_DIR)\google\cloud\bigquery\v2\minimal\internal -Recurse" \
+	)
 
 config-google-cloud-cpp: fetch-google-cloud-cpp apply-bigquery-rest-api-patch
     @ if not exist "$(GOOGLE_CLOUD_CPP_BIGQUERY_CONFIG_CMAKE)" ( \
