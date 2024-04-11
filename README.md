@@ -14,6 +14,7 @@ Compiled with:
 
 ##### Notes:
 *1. We're using libcurl 8.7.1_7 on Windows, and latest version on homebrew (for macOS) and APT (for Linux)*
+
 *2: For Windows we're using precompiled OpenSSL binaries from [cocoa-xu/openssl-build](https://github.com/cocoa-xu/openssl-build).*
 
 ### Availability
